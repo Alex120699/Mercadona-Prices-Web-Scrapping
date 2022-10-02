@@ -116,4 +116,4 @@ def get_mercadona_info(codigo_postal):
     data["Cantidad"] = np.array(categories_structure_list)[:,4]
     data["Precio"] = list(map(float,list(np.array(categories_structure_list)[:,5])))
 
-    data.to_csv(f"mercadona_prices_{codigo_postal}_{str(date.today())}.csv")
+    data.to_csv(f"./data/mercadona_prices_{codigo_postal}_{str(date.today())}.csv")
