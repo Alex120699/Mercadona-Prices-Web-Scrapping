@@ -1,18 +1,31 @@
-import json
 import streamlit as st
+import pandas as pd
+import json
 
-# Función para cargar los productos desde el archivo JSON
-def load_products():
-    with open('products.json', 'r') as f:
-        products = json.load(f)
-    return products
+# Cargar los datos del JSON
+with open("products.json", "r") as f:
+    products_data = json.load(f)
 
+# Convertir los datos a un DataFrame de pandas
+df = pd.DataFrame(products_data)
 
-# Cargar productos
-products = load_products()
+# Título de la app
+st.title("Visualización de Productos")
 
-# Contar y mostrar el número de productos
-num_products = len(products)
+# Mostrar el número total de productos
+st.write(f"Total de productos: {len(df)}")
 
-# Mostrar en la app de Streamlit
-st.write(f'Número de productos en el archivo JSON: {num_products}')
+# Filtros interactivos para mostrar productos
+category_filter = st.selectbox("Seleccionar Categoría", df['categoryL1'].unique())
+price_filter = st.slider("Filtrar por precio", 0, 100, (0, 100))
+
+# Filtrar según la categoría y el precio
+filtered_df = df[
+    (df['categoryL1'] == category_filter) &
+    (df['price'].apply(lambda x: float(x.split(" ")[0].replace(",", "."))) >= price_filter[0]) &
+    (df['price'].apply(lambda x: float(x.split(" ")[0].replace(",", "."))) <= price_filter[1])
+]
+
+# Mostrar la tabla de productos filtrados
+st.dataframe(filtered_df)
+
