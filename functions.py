@@ -45,6 +45,21 @@ def get_into_mercadona_web(driver, codigo_postal):
 
     print("Código postal ingresado y cookies aceptadas.")
 
+def get_images(driver):
+    #Read image
+    img_element = driver.find_element(By.TAG_NAME, 'img')
+    img_url = img_element.get_attribute('src')
+    if not os.path.exists('imgs'):
+        os.makedirs('imgs')
+    img_data = requests.get(img_url).content
+    img_filename = str(uuid.uuid4()) + '.jpg'
+    img_path = os.path.join('imgs', img_filename)
+    img_data = requests.get(img_url).content
+    with open(img_path, 'wb') as file:
+        file.write(img_data)
+
+    return img_path
+
 def extract_product_data(driver):
 
     #Read description
@@ -70,20 +85,10 @@ def extract_product_data(driver):
     )
     price_text = price_element.text
 
-    #Read image
-    img_element = driver.find_element(By.TAG_NAME, 'img')
-    img_url = img_element.get_attribute('src')
-    if not os.path.exists('imgs'):
-        os.makedirs('imgs')
-    img_data = requests.get(img_url).content
-    img_filename = str(uuid.uuid4()) + '.jpg'
-    img_path = os.path.join('imgs', img_filename)
-    img_data = requests.get(img_url).content
-    with open(img_path, 'wb') as file:
-        file.write(img_data)
+    #img_path = get_images(driver)
 
 
-    attributes = {"description":description_text, "technical_attributes":technical_attributes,"price":price_text,"img_path":img_path}
+    attributes = {"description":description_text, "technical_attributes":technical_attributes,"price":price_text}#"img_path":img_path}
 
     return attributes
 
