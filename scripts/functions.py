@@ -212,8 +212,12 @@ def get_mercadona_info():
 
             for product in products:
                 # Procesar el producto
-                product_data = process_product(driver, product, category_text, subcategory_text)
-                product_list.append(product_data)
+                try:
+                    product_data = process_product(driver, product, category_text, subcategory_text)
+                    product_list.append(product_data)
+                except Exception as e:
+                    print(f"Error extracting data for product '{product.text}': {e}")
+                    continue  # Skip this product and continue with the next
 
     # Guardar los datos extraídos
     save_data(product_list)
