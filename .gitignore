@@ -1,0 +1,9 @@
+venv/
+chromedriver-win64/
+__pycache__/
+config.toml
+data/
+imgs/
+products.json
+variations.ipynb
+logo.ico
