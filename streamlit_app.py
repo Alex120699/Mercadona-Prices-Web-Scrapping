@@ -7,6 +7,7 @@ def load_products():
         products = json.load(f)
     return products
 
+
 # Cargar productos
 products = load_products()
 
