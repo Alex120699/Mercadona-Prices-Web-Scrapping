@@ -14,6 +14,55 @@ from selenium.webdriver.chrome.service import Service
 import requests
 import uuid
 
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+class ProductExtractor:
+    def __init__(self, driver):
+        self.driver = driver
+
+    def _get_element(self, by, value, timeout=10):
+        """Helper function to find elements with a timeout"""
+        try:
+            return WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((by, value)))
+        except Exception as e:
+            print(f"Error finding element: {value}. Error: {e}")
+            return None
+
+    def extract_description(self):
+        """Extracts product description"""
+        description_element = self._get_element(By.CSS_SELECTOR, 'h1.title2-b.private-product-detail__description')
+        return description_element.text if description_element else ""
+
+    def extract_technical_attributes(self):
+        """Extracts technical attributes like size, format, etc."""
+        product_format_element = self._get_element(By.CSS_SELECTOR, 'div.product-format.product-format__size')
+        technical_attributes = ""
+        if product_format_element:
+            span_elements = product_format_element.find_elements(By.CSS_SELECTOR, 'span.headline1-r')
+            for span in span_elements:
+                technical_attributes += " " + span.text
+        return technical_attributes.strip()
+
+    def extract_price(self):
+        """Extracts product price"""
+        price_element = self._get_element(By.XPATH, '//*[@id="root"]/div[4]/div/div[2]/div/div[2]/div[2]/div[2]/div[2]/div/p[1]')
+        return price_element.text if price_element else ""
+
+    def extract_product_data(self):
+        """Main method to extract all product data"""
+        description = self.extract_description()
+        technical_attributes = self.extract_technical_attributes()
+        price = self.extract_price()
+
+        # Combine all attributes into a dictionary
+        return {
+            "description": description,
+            "technical_attributes": technical_attributes,
+            "price": price
+        }
+
 
 def get_into_mercadona_web(driver, codigo_postal):
     # Ir a la página de Mercadona
@@ -60,37 +109,37 @@ def get_images(driver):
 
     return img_path
 
-def extract_product_data(driver):
+# def extract_product_data(driver):
 
-    #Read description
-    description_element = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, 'h1.title2-b.private-product-detail__description'))
-                )
-     #Leer el texto de la descripción
-    description_text = description_element.text
+#     #Read description
+#     description_element = WebDriverWait(driver, 10).until(
+#                     EC.presence_of_element_located((By.CSS_SELECTOR, 'h1.title2-b.private-product-detail__description'))
+#                 )
+#      #Leer el texto de la descripción
+#     description_text = description_element.text
 
-    #Read technical attributes
-    product_format_element = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, 'div.product-format.product-format__size'))
-    )
-    span_elements = product_format_element.find_elements(By.CSS_SELECTOR, 'span.headline1-r')
-    technical_attributes = ""
-    for span in span_elements:
-        technical_attributes = technical_attributes + " " + span.text
-
-
-    #Read PRice
-    price_element = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, '//*[@id="root"]/div[4]/div/div[2]/div/div[2]/div[2]/div[2]/div[2]/div/p[1]'))
-    )
-    price_text = price_element.text
-
-    #img_path = get_images(driver)
+#     #Read technical attributes
+#     product_format_element = WebDriverWait(driver, 10).until(
+#         EC.presence_of_element_located((By.CSS_SELECTOR, 'div.product-format.product-format__size'))
+#     )
+#     span_elements = product_format_element.find_elements(By.CSS_SELECTOR, 'span.headline1-r')
+#     technical_attributes = ""
+#     for span in span_elements:
+#         technical_attributes = technical_attributes + " " + span.text
 
 
-    attributes = {"description":description_text, "technical_attributes":technical_attributes,"price":price_text}#"img_path":img_path}
+#     #Read PRice
+#     price_element = WebDriverWait(driver, 10).until(
+#         EC.presence_of_element_located((By.XPATH, '//*[@id="root"]/div[4]/div/div[2]/div/div[2]/div[2]/div[2]/div[2]/div/p[1]'))
+#     )
+#     price_text = price_element.text
 
-    return attributes
+#     #img_path = get_images(driver)
+
+
+#     attributes = {"description":description_text, "technical_attributes":technical_attributes,"price":price_text}#"img_path":img_path}
+
+#     return attributes
 
 def get_mercadona_info():
 
@@ -176,8 +225,9 @@ def get_mercadona_info():
 
                 #CLICAMOS EL PRODUCTO
                 product.click()
-    
-                attributes = extract_product_data(driver)
+
+                extractor = ProductExtractor(driver)
+                attributes = extractor.extract_product_data()
                 
                 attributes["categoryL1"] = category_text
                 attributes["categoryL2"] = subcategory_text
