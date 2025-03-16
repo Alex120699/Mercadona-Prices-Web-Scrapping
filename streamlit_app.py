@@ -1,10 +1,17 @@
-# app.py
-
+import json
 import streamlit as st
 
-st.title('Mi Primera App en Streamlit')
+# Función para cargar los productos desde el archivo JSON
+def load_products():
+    with open('products.json', 'r') as f:
+        products = json.load(f)
+    return products
 
-st.write('¡Hola, mundo! Esta es mi primera app en Streamlit desplegada en la nube. Esta es la segunda version.')
+# Cargar productos
+products = load_products()
 
-if st.button('Haz clic aquí'):
-    st.write('¡Has hecho clic en el botón!')
+# Contar y mostrar el número de productos
+num_products = len(products)
+
+# Mostrar en la app de Streamlit
+st.write(f'Número de productos en el archivo JSON: {num_products}')
