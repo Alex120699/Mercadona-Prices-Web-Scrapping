@@ -4,7 +4,7 @@ import streamlit as st
 
 st.title('Mi Primera App en Streamlit')
 
-st.write('¡Hola, mundo! Esta es mi primera app en Streamlit desplegada en la nube.')
+st.write('¡Hola, mundo! Esta es mi primera app en Streamlit desplegada en la nube. Esta es la segunda version.')
 
 if st.button('Haz clic aquí'):
     st.write('¡Has hecho clic en el botón!')
