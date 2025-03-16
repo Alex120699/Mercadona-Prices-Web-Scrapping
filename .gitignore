@@ -3,7 +3,6 @@ chromedriver-win64/
 __pycache__/
 config.toml
 imgs/
-products.json
 products copy.json
 variations.ipynb
 logo.ico
