@@ -53,6 +53,9 @@ def show():
     filtered_df['is_hacendado'] = filtered_df['description'].str.contains("Hacendado", case=False, na=False)
     hacendado_counts = filtered_df['is_hacendado'].value_counts()
 
+    # Asegurar que tenemos ambas categorías (True para Hacendado, False para Otros)
+    hacendado_counts = hacendado_counts.reindex([True, False], fill_value=0)
+
     plt.figure(figsize=(6, 4))
     plt.pie(hacendado_counts, labels=["Hacendado", "Otros"], autopct='%1.1f%%', colors=["green", "gray"], startangle=90)
     plt.title("Productos con y sin 'Hacendado'")
