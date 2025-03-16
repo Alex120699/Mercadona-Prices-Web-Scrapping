@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Mercadona Web Scraping
 
 This project is a web scraper built using Selenium and Python that extracts product information from the Mercadona website. The scraper collects product details such as description, technical attributes, price, and category, and stores this data in a structured format (JSON and Excel).
