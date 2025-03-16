@@ -109,37 +109,6 @@ def get_images(driver):
 
     return img_path
 
-# def extract_product_data(driver):
-
-#     #Read description
-#     description_element = WebDriverWait(driver, 10).until(
-#                     EC.presence_of_element_located((By.CSS_SELECTOR, 'h1.title2-b.private-product-detail__description'))
-#                 )
-#      #Leer el texto de la descripción
-#     description_text = description_element.text
-
-#     #Read technical attributes
-#     product_format_element = WebDriverWait(driver, 10).until(
-#         EC.presence_of_element_located((By.CSS_SELECTOR, 'div.product-format.product-format__size'))
-#     )
-#     span_elements = product_format_element.find_elements(By.CSS_SELECTOR, 'span.headline1-r')
-#     technical_attributes = ""
-#     for span in span_elements:
-#         technical_attributes = technical_attributes + " " + span.text
-
-
-#     #Read PRice
-#     price_element = WebDriverWait(driver, 10).until(
-#         EC.presence_of_element_located((By.XPATH, '//*[@id="root"]/div[4]/div/div[2]/div/div[2]/div[2]/div[2]/div[2]/div/p[1]'))
-#     )
-#     price_text = price_element.text
-
-#     #img_path = get_images(driver)
-
-
-#     attributes = {"description":description_text, "technical_attributes":technical_attributes,"price":price_text}#"img_path":img_path}
-
-#     return attributes
 
 def get_mercadona_info():
 
