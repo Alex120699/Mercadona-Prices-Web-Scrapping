@@ -58,8 +58,8 @@ def show_kpis(df):
     df['price_numeric'] = df['price'].apply(lambda x: float(x.split(' ')[0].replace(',', '.')))
 
     # Crear bins para los precios
-    price_bins = [0, 5, 10, 20, 30, 50, 100, 200, 500]
-    price_labels = ['0-5', '5-10', '10-20', '20-30', '30-50', '50-100', '100-200', '200-500']
+    price_bins = [0, 1, 2, 3, 5, 7, 10, 25, 50]
+    price_labels = ['0-1', '1-2', '2-3', '3-5', '5-7', '7-10', '10-25', '25-50']
 
     # Categorizar los precios
     df['price_range'] = pd.cut(df['price_numeric'], bins=price_bins, labels=price_labels, right=False)
