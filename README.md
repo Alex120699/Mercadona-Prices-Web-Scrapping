@@ -25,9 +25,10 @@ To install the necessary libraries, run:
 pip install selenium pandas toml openpyxl
 ```
 
-## Setu
+## Setup
 
 1. **Create a config.toml file**
+
 In the project root, create a (`config.toml`) file with the following structure:
 
 ```toml
@@ -36,9 +37,11 @@ codigo_postal = "12345"
 driver_path = "path_to_your_chromedriver"
 ```
 2. **Download ChromeDriver**
+
 Ensure ChromeDriver is installed and matches your Chrome browser version. Download it from here https://developer.chrome.com/docs/chromedriver?hl=es-419.
 
 3. **Folder Structure**
+
 Your project folder should look like this:
 ```
 project_root/
