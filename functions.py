@@ -63,7 +63,6 @@ class ProductExtractor:
             "price": price
         }
 
-
 def get_into_mercadona_web(driver, codigo_postal):
     # Ir a la página de Mercadona
     print("Opening Mercadona website...")
@@ -110,110 +109,61 @@ def get_images(driver):
     return img_path
 
 
-def get_mercadona_info():
-
-    # Cargar configuración desde TOML
+def load_config():
+    """Carga la configuración desde el archivo TOML."""
     print("Cargando config.toml...")
-
     config = toml.load("config.toml")
+    return config["settings"]["codigo_postal"], config["settings"]["driver_path"]
 
-    # Cargar codigo postal como input para la web
-    print("Cargando valores...")
-    codigo_postal = config["settings"]["codigo_postal"]
-    driver_path = config["settings"]["driver_path"]
-
-
-    # Configurar opciones de Chrome
+def init_webdriver(driver_path):
+    """Inicia y configura el WebDriver."""
     print(f"Usando ChromeDriver en: {driver_path}")
-
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument("--headless=new")  # Para evitar problemas en versiones recientes
-    # chrome_options.add_argument("--start-maximized")
-    # chrome_options.add_argument('--disable-extensions')
-
-    # Crear una instancia del WebDriver
-    print("Iniciando WebDriver...")
-
-    service = Service(driver_path)  # Usar Service para definir el path
+    chrome_options.add_argument("--headless=new")
+    service = Service(driver_path)
     driver = webdriver.Chrome(service=service, options=chrome_options)
-    driver.get("https://www.google.com")  # Prueba con una página más simple
+    return driver
 
+def get_categories(driver):
+    """Obtiene las categorías principales."""
+    return driver.find_elements(By.CSS_SELECTOR, 'label.subhead1-r')
 
-    print("WebDriver iniciado correctamente.")
+def navigate_to_subcategory(driver, i):
+    """Navega a una subcategoría específica haciendo clic en la categoría correspondiente."""
+    label = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.XPATH, f'//*[@id="root"]/div[2]/div[1]/ul/li[{i}]/div/button/span/label'))
+    )
+    label.click()
 
+def get_subcategories(driver):
+    """Obtiene las subcategorías dentro de una categoría."""
+    return driver.find_elements(By.CSS_SELECTOR, 'button.category-item__link')
 
-    get_into_mercadona_web(driver,codigo_postal)
+def get_products(driver):
+    """Obtiene los productos dentro de una subcategoría."""
+    return WebDriverWait(driver, 10).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'h4.subhead1-r.product-cell__description-name'))
+    )
 
+def process_product(driver, product, category_text, subcategory_text):
+    """Extrae la información de un producto y la agrega a la lista."""
+    print(f"Processing product: {product.text}")
+    product.click()
 
-    categories_structure_list = []
-    #RECORREMOS LAS CATEGORIAS
-    print("Checking number of categories...")
-    categories = driver.find_elements(By.CSS_SELECTOR, 'label.subhead1-r')
+    # Extraer información del producto
+    extractor = ProductExtractor(driver)
+    attributes = extractor.extract_product_data()
+    attributes["categoryL1"] = category_text
+    attributes["categoryL2"] = subcategory_text
+    attributes["ProductURL"] = driver.current_url
 
-    product_list = []
+    # Cerrar producto
+    close_button = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[data-testid="modal-close-button"]'))
+    )
+    close_button.click()
 
-    for i,category in enumerate(categories):
-        category_text = category.text
-        print("Category in progress: ",category_text)
-        i=i+1
-        #CLICK EN CATEGORIA
-        label = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, f'//*[@id="root"]/div[2]/div[1]/ul/li[{i}]/div/button/span/label'))
-        )
-        label.click()
-
-        #Comprobamos subcategorias
-        subcategories = driver.find_elements(By.CSS_SELECTOR, 'button.category-item__link')
-
-        #RECORREMOS LAS SUBCATEGORIAS
-        for j,subcategory in enumerate(subcategories):
-            j=j+1
-            subcategory_text = subcategory.text
-            print("SubCategory in progress: ",subcategory_text)
-            
-            #CLICK EN SUBCATEGORIA
-            WebDriverWait(driver, 5)\
-                .until(EC.element_to_be_clickable((By.XPATH,
-                                                f'/html/body/div[1]/div[2]/div[1]/ul/li[{i}]/div/ul/li[{j}]')))\
-                .click()
-            
-
-            print("Checking SubSubCategories...")
-            subsubcategories = driver.find_elements(By.CSS_SELECTOR, 'h2.section__header.headline1-b')
-
-
-            #Comprobamos productos
-            products = WebDriverWait(driver, 10).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'h4.subhead1-r.product-cell__description-name'))
-            )
-            
-            #RECORREMOS LOS PRODUCTOS
-            for product in products:
-                
-                print("Product in progress: ",product.text)
-
-                #CLICAMOS EL PRODUCTO
-                product.click()
-
-                extractor = ProductExtractor(driver)
-                attributes = extractor.extract_product_data()
-                
-                attributes["categoryL1"] = category_text
-                attributes["categoryL2"] = subcategory_text
-                attributes["ProductURL"] = driver.current_url
-                
-                #CERRAMOS EL PRODUCTO
-                close_button = WebDriverWait(driver, 10).until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[data-testid="modal-close-button"]'))
-                )
-                close_button.click()            
-
-                product_list.append(attributes)
-                break
-            break
-        break
-
-    save_data(product_list)
+    return attributes
 
 def save_data(list):
     import json
@@ -223,16 +173,51 @@ def save_data(list):
     with open(json_file_path, 'w', encoding='utf-8') as json_file:
         json.dump(list, json_file, ensure_ascii=False, indent=4)
 
-    # data = pd.DataFrame()
-    # data["Category"] = np.array(categories_structure_list)[:,0]
-    # data["Subcategory"] = np.array(categories_structure_list)[:,1]
-    # data["Subsubcategory"] = np.array(categories_structure_list)[:,2]
-    # data["Producto"] = np.array(categories_structure_list)[:,3]
-    # data["Cantidad"] = np.array(categories_structure_list)[:,4]
-    # data["Precio"] = list(map(float,list(np.array(categories_structure_list)[:,5])))
 
-    # current_dir = os.getcwd()
-    # print(current_dir)
-    # file_path = os.path.join(current_dir,"data",f'mercadona_prices_{codigo_postal}_{str(date.today())}.csv')
+def get_mercadona_info():
+    """Función principal que gestiona todo el flujo de extracción de datos."""
+    # Cargar configuración y configurar el WebDriver
+    codigo_postal, driver_path = load_config()
+    driver = init_webdriver(driver_path)
+    
 
-    # data.to_csv(file_path)
+     # Iniciar la página de Mercadona
+    print("Iniciando WebDriver en Mercadona...")
+    get_into_mercadona_web(driver, codigo_postal)
+    
+    # Lista para almacenar los productos
+    product_list = []
+
+    # Recorrer las categorías
+    print("Checking number of categories...")
+    categories = get_categories(driver)
+
+    for i, category in enumerate(categories):
+        category_text = category.text
+        print(f"Category in progress: {category_text}")
+
+        # Navegar a la categoría
+        navigate_to_subcategory(driver, i+1)
+
+        # Obtener las subcategorías
+        subcategories = get_subcategories(driver)
+
+        for j, subcategory in enumerate(subcategories):
+            subcategory_text = subcategory.text
+            print(f"SubCategory in progress: {subcategory_text}")
+
+            # Hacer clic en la subcategoría
+            WebDriverWait(driver, 5).until(
+                EC.element_to_be_clickable((By.XPATH, f'/html/body/div[1]/div[2]/div[1]/ul/li[{i+1}]/div/ul/li[{j+1}]'))
+            ).click()
+
+            # Obtener los productos
+            products = get_products(driver)
+
+            for product in products:
+                # Procesar el producto
+                product_data = process_product(driver, product, category_text, subcategory_text)
+                product_list.append(product_data)
+
+    # Guardar los datos extraídos
+    save_data(product_list)
