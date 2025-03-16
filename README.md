@@ -51,3 +51,29 @@ project_root/
 ├── main.py                # Main scraper script
 └── requirements.txt       # Dependencies list
 ```
+
+## Usage
+
+1. **Run the scraper**
+
+Once everything is set up, you can run the scraper by executing the following command:
+
+```bash
+python main.py
+```
+
+This will start the scraping process, and the product data will be saved in the following formats:
+
+**products.json** (JSON format)
+**products.xlsx** (Excel format)
+
+2. **View the output**
+
+The scraped data includes:
+
+- Product description
+- Technical attributes
+- Price
+- Categories (L1 and L2)
+- Product URL
+- Image paths (if applicable)
