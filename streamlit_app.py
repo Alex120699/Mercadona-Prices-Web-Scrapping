@@ -22,6 +22,7 @@ def show_product_table(df):
     # Mostrar los productos filtrados
     st.dataframe(filtered_df)
 
+
 # Función para mostrar detalles del producto
 def show_product_details(df):
     # Filtro por producto
@@ -36,14 +37,21 @@ def show_product_details(df):
     st.write(f"**Categoría L2:** {product_data['categoryL2']}")
     st.write(f"[Ver Producto en Mercadona]({product_data['ProductURL']})")
 
-# Función para mostrar KPIs básicos
+
+# Función para mostrar KPIs básicos con filtros interactivos
 def show_kpis(df):
     st.header("KPIs Básicos de Productos")
 
+    # Filtro de categoría (L1)
+    selected_category = st.selectbox("Selecciona una categoría L1", df['categoryL1'].unique())
+
+    # Filtrar el DataFrame según la categoría seleccionada
+    filtered_df = df[df['categoryL1'] == selected_category]
+
     # 1. Número de productos por categoría L1
-    st.subheader("Número de productos por categoría L1")
-    category_count = df['categoryL1'].value_counts()
-    
+    st.subheader(f"Número de productos en la categoría: {selected_category}")
+    category_count = filtered_df['categoryL1'].value_counts()
+
     # Graficar
     plt.figure(figsize=(10, 6))
     sns.barplot(x=category_count.index, y=category_count.values, palette="viridis")
@@ -55,17 +63,17 @@ def show_kpis(df):
     # 2. Distribución de precios en diferentes rangos
     st.subheader("Distribución de productos por precio")
     # Limpiar precios y convertir a número
-    df['price_numeric'] = df['price'].apply(lambda x: float(x.split(' ')[0].replace(',', '.')))
+    filtered_df['price_numeric'] = filtered_df['price'].apply(lambda x: float(x.split(' ')[0].replace(',', '.')))
 
     # Crear bins para los precios
     price_bins = [0, 1, 2, 3, 5, 7, 10, 25, 50]
     price_labels = ['0-1', '1-2', '2-3', '3-5', '5-7', '7-10', '10-25', '25-50']
 
     # Categorizar los precios
-    df['price_range'] = pd.cut(df['price_numeric'], bins=price_bins, labels=price_labels, right=False)
+    filtered_df['price_range'] = pd.cut(filtered_df['price_numeric'], bins=price_bins, labels=price_labels, right=False)
 
     # Contar los productos por rango de precios
-    price_range_count = df['price_range'].value_counts().sort_index()
+    price_range_count = filtered_df['price_range'].value_counts().sort_index()
 
     # Graficar
     plt.figure(figsize=(10, 6))
@@ -77,12 +85,12 @@ def show_kpis(df):
 
     # 3. Número de productos por subcategoría L2
     st.subheader("Número de productos por subcategoría L2")
-    subcategory_count = df['categoryL2'].value_counts()
+    subcategory_count = filtered_df['categoryL2'].value_counts()
 
     # Graficar
     plt.figure(figsize=(10, 6))
     sns.barplot(x=subcategory_count.index, y=subcategory_count.values, palette="muted")
-    plt.title("Número de productos por subcategoría")
+    plt.title(f"Número de productos en subcategoría para {selected_category}")
     plt.xlabel("Subcategoría L2")
     plt.ylabel("Número de productos")
     plt.xticks(rotation=90)
