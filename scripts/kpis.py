@@ -15,11 +15,13 @@ def show():
     df = pd.DataFrame(load_data())
 
     # Selección de categoría
-    selected_category = st.selectbox("Selecciona una categoría:", df['categoryL1'].unique())
-
-    # Filtrar datos por categoría seleccionada
-    filtered_df = df[df['categoryL1'] == selected_category]
-
+    selected_category_l1 = st.selectbox("Selecciona una categoría L1:", ["Todas"] + list(df['categoryL1'].unique()))
+    filtered_df = df if selected_category_l1 == "Todas" else df[df['categoryL1'] == selected_category_l1]
+    
+    if not filtered_df.empty:
+        selected_category_l2 = st.selectbox("Selecciona una categoría L2:", ["Todas"] + list(filtered_df['categoryL2'].unique()))
+        filtered_df = filtered_df if selected_category_l2 == "Todas" else filtered_df[filtered_df['categoryL2'] == selected_category_l2]
+    
     # Número de productos por subcategoría
     st.subheader("Número de productos por subcategoría (L2)")
     category_counts = filtered_df['categoryL2'].value_counts()
@@ -28,19 +30,31 @@ def show():
     plt.figure(figsize=(10, 6))
     sns.barplot(x=category_counts.index, y=category_counts.values, palette="muted")
     plt.xticks(rotation=90)
-    plt.title(f"Productos en {selected_category}")
+    plt.title(f"Productos en {selected_category_l1}")
     plt.xlabel("Subcategoría L2")
     plt.ylabel("Cantidad de productos")
     st.pyplot(plt)
 
     # Distribución de precios
     st.subheader("Distribución de precios")
-
+    
     filtered_df['price_numeric'] = filtered_df['price'].apply(lambda x: float(x.split(' ')[0].replace(',', '.')))
 
     plt.figure(figsize=(10, 6))
     sns.histplot(filtered_df['price_numeric'], bins=20, kde=True, color="blue")
-    plt.title(f"Distribución de precios en {selected_category}")
+    plt.title(f"Distribución de precios en {selected_category_l1}")
     plt.xlabel("Precio (€)")
     plt.ylabel("Frecuencia")
+    st.pyplot(plt)
+    
+    # Comparación de productos con y sin "Hacendado" en el título
+    st.subheader("Comparación de productos con 'Hacendado'")
+    
+    filtered_df['is_hacendado'] = filtered_df['description'].str.contains("Hacendado", case=False, na=False)
+    hacendado_counts = filtered_df['is_hacendado'].value_counts()
+
+    plt.figure(figsize=(6, 4))
+    sns.barplot(x=hacendado_counts.index.map({True: "Hacendado", False: "Otros"}), y=hacendado_counts.values, palette=["green", "gray"])
+    plt.title("Productos con y sin 'Hacendado'")
+    plt.ylabel("Cantidad de productos")
     st.pyplot(plt)
