@@ -54,7 +54,6 @@ def show():
     hacendado_counts = filtered_df['is_hacendado'].value_counts()
 
     plt.figure(figsize=(6, 4))
-    sns.barplot(x=hacendado_counts.index.map({True: "Hacendado", False: "Otros"}), y=hacendado_counts.values, palette=["green", "gray"])
+    plt.pie(hacendado_counts, labels=["Hacendado", "Otros"], autopct='%1.1f%%', colors=["green", "gray"], startangle=90)
     plt.title("Productos con y sin 'Hacendado'")
-    plt.ylabel("Cantidad de productos")
     st.pyplot(plt)
