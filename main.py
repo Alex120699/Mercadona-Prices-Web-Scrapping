@@ -1,3 +1,3 @@
-from functions import get_mercadona_info
+from scripts.functions import get_mercadona_info
 
 get_mercadona_info()

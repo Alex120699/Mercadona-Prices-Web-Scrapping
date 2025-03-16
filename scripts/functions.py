@@ -1,12 +1,8 @@
-from webbrowser import Chrome
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 import time
-import pandas as pd
-import numpy as np
 from datetime import date
 import os
 import toml

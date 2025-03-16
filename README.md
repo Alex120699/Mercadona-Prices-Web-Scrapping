@@ -27,7 +27,24 @@ pip install selenium pandas toml openpyxl
 
 ## Setup
 
-1. **Create a config.toml file**
+
+### 1. Create a Virtual Environment (venv)
+
+It's a good practice to use a virtual environment to keep the dependencies isolated. You can create and activate a virtual environment as follows:
+
+#### For Windows:
+
+```bash
+python -m venv venv
+.\venv\Scripts\activate.bat
+```
+
+### 2. Install Dependencies from (`requirements.txt`)
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Create a config.toml file
 
 In the project root, create a (`config.toml`) file with the following structure:
 
@@ -36,11 +53,11 @@ In the project root, create a (`config.toml`) file with the following structure:
 codigo_postal = "12345"
 driver_path = "path_to_your_chromedriver"
 ```
-2. **Download ChromeDriver**
+### 4. Download ChromeDriver
 
 Ensure ChromeDriver is installed and matches your Chrome browser version. Download it from here https://developer.chrome.com/docs/chromedriver?hl=es-419.
 
-3. **Folder Structure**
+### 5. Folder Structure
 
 Your project folder should look like this:
 ```
