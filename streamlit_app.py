@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import json
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Cargar los datos del JSON
 @st.cache
@@ -34,6 +36,58 @@ def show_product_details(df):
     st.write(f"**Categoría L2:** {product_data['categoryL2']}")
     st.write(f"[Ver Producto en Mercadona]({product_data['ProductURL']})")
 
+# Función para mostrar KPIs básicos
+def show_kpis(df):
+    st.header("KPIs Básicos de Productos")
+
+    # 1. Número de productos por categoría L1
+    st.subheader("Número de productos por categoría L1")
+    category_count = df['categoryL1'].value_counts()
+    
+    # Graficar
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x=category_count.index, y=category_count.values, palette="viridis")
+    plt.title("Número de productos por categoría")
+    plt.xlabel("Categoría L1")
+    plt.ylabel("Número de productos")
+    st.pyplot(plt)
+
+    # 2. Distribución de precios en diferentes rangos
+    st.subheader("Distribución de productos por precio")
+    # Limpiar precios y convertir a número
+    df['price_numeric'] = df['price'].apply(lambda x: float(x.split(' ')[0].replace(',', '.')))
+
+    # Crear bins para los precios
+    price_bins = [0, 5, 10, 20, 30, 50, 100, 200, 500]
+    price_labels = ['0-5', '5-10', '10-20', '20-30', '30-50', '50-100', '100-200', '200-500']
+
+    # Categorizar los precios
+    df['price_range'] = pd.cut(df['price_numeric'], bins=price_bins, labels=price_labels, right=False)
+
+    # Contar los productos por rango de precios
+    price_range_count = df['price_range'].value_counts().sort_index()
+
+    # Graficar
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x=price_range_count.index, y=price_range_count.values, palette="coolwarm")
+    plt.title("Distribución de productos por rango de precios")
+    plt.xlabel("Rango de precios")
+    plt.ylabel("Número de productos")
+    st.pyplot(plt)
+
+    # 3. Número de productos por subcategoría L2
+    st.subheader("Número de productos por subcategoría L2")
+    subcategory_count = df['categoryL2'].value_counts()
+
+    # Graficar
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x=subcategory_count.index, y=subcategory_count.values, palette="muted")
+    plt.title("Número de productos por subcategoría")
+    plt.xlabel("Subcategoría L2")
+    plt.ylabel("Número de productos")
+    plt.xticks(rotation=90)
+    st.pyplot(plt)
+
 # Función principal para la aplicación
 def main():
     # Cargar datos
@@ -46,12 +100,14 @@ def main():
     st.write(f"Total de productos disponibles: {len(df)}")
 
     # Opciones de navegación
-    option = st.sidebar.selectbox("Selecciona una opción", ["Ver productos", "Ver detalles de producto"])
+    option = st.sidebar.selectbox("Selecciona una opción", ["Ver productos", "Ver detalles de producto", "KPIs Básicos"])
     
     if option == "Ver productos":
         show_product_table(df)
     elif option == "Ver detalles de producto":
         show_product_details(df)
+    elif option == "KPIs Básicos":
+        show_kpis(df)
 
 if __name__ == "__main__":
     main()
