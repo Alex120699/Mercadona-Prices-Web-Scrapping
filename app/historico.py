@@ -11,21 +11,24 @@ def show():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Obtener la lista de productos
-    cursor.execute("SELECT id, nombre FROM productos")
+    # Obtener la lista de productos con nombre y tamaño
+    cursor.execute("SELECT id, nombre, unit_size, size_format FROM productos")
     productos = cursor.fetchall()
 
     # Convertir a DataFrame
-    df_productos = pd.DataFrame(productos, columns=["id", "nombre"])
+    df_productos = pd.DataFrame(productos, columns=["id", "nombre", "unit_size", "size_format"])
+
+    # Combinar nombre y tamaño para el desplegable
+    df_productos["nombre_y_tamaño"] = df_productos["nombre"] + " (" + df_productos["unit_size"].astype(str) + " " + df_productos["size_format"] + ")"
 
     # Selección de producto
     selected_product = st.selectbox(
         "Selecciona un producto:",
-        df_productos["nombre"]
+        df_productos["nombre_y_tamaño"]
     )
 
     # Obtener el ID del producto seleccionado
-    producto_id = df_productos[df_productos["nombre"] == selected_product]["id"].iloc[0]
+    producto_id = df_productos[df_productos["nombre_y_tamaño"] == selected_product]["id"].iloc[0]
 
     # Obtener el histórico de precios del producto seleccionado
     cursor.execute("""
