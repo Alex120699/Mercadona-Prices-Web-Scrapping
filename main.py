@@ -1,7 +1,4 @@
-from scripts.functions import get_mercadona_info
-
-def main():
-    get_mercadona_info()
+from scripts.functions_old import main
 
 if __name__ == "__main__":
     main()

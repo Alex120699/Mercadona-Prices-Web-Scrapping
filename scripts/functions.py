@@ -1,223 +1,95 @@
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-import time
-from datetime import date
-import os
-import toml
-from selenium.webdriver.chrome.service import Service
 import requests
-import uuid
+import pandas as pd
+import json
 
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+# Constantes
+CATEGORIES_URL = "https://tienda.mercadona.es/api/categories/"
 
-class ProductExtractor:
-    def __init__(self, driver):
-        self.driver = driver
+def fetch_categories():
+    """Obtiene las categorías de nivel 1 (L1) desde la API."""
+    response = requests.get(CATEGORIES_URL)
+    if response.status_code == 200:
+        return response.json().get("results", [])
+    return []
 
-    def _get_element(self, by, value, timeout=10):
-        """Helper function to find elements with a timeout"""
-        try:
-            return WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((by, value)))
-        except Exception as e:
-            print(f"Error finding element: {value}. Error: {e}")
-            return None
+def fetch_products(subcategory_id):
+    """Obtiene los productos de una subcategoría (L3) desde la API."""
+    products_url = f"https://tienda.mercadona.es/api/categories/{subcategory_id}"
+    response = requests.get(products_url)
+    if response.status_code == 200:
+        return response.json().get("categories", [])
+    return []
 
-    def extract_description(self):
-        """Extracts product description"""
-        description_element = self._get_element(By.CSS_SELECTOR, 'h1.title2-b.private-product-detail__description')
-        return description_element.text if description_element else ""
-
-    def extract_technical_attributes(self):
-        """Extracts technical attributes like size, format, etc."""
-        product_format_element = self._get_element(By.CSS_SELECTOR, 'div.product-format.product-format__size')
-        technical_attributes = ""
-        if product_format_element:
-            span_elements = product_format_element.find_elements(By.CSS_SELECTOR, 'span.headline1-r')
-            for span in span_elements:
-                technical_attributes += " " + span.text
-        return technical_attributes.strip()
-
-    def extract_price(self):
-        """Extracts product price"""
-        price_element = self._get_element(By.XPATH, '//*[@id="root"]/div[4]/div/div[2]/div/div[2]/div[2]/div[2]/div[2]/div/p[1]')
-        return price_element.text if price_element else ""
-
-    def extract_product_data(self):
-        """Main method to extract all product data"""
-        description = self.extract_description()
-        technical_attributes = self.extract_technical_attributes()
-        price = self.extract_price()
-
-        # Combine all attributes into a dictionary
-        return {
-            "description": description,
-            "technical_attributes": technical_attributes,
-            "price": price
-        }
-
-def get_into_mercadona_web(driver, codigo_postal):
-    # Ir a la página de Mercadona
-    print("Opening Mercadona website...")
-    driver.get('https://tienda.mercadona.es/categories/112')
-
-    # Esperar y escribir el código postal
-    print("Filling Postal Code...")
-    WebDriverWait(driver, 5).until(
-        EC.element_to_be_clickable((By.CSS_SELECTOR, 'input.ym-hide-content'))
-    ).send_keys(str(codigo_postal))
+def parse_product(product, category_L1, category_L2, category_L3):
+    """Parsea un producto y devuelve un diccionario con sus datos."""
+    price_instructions = product.get("price_instructions", {})
+    previous_price = price_instructions.get("previous_unit_price")
     
-    time.sleep(1)  # Pequeña pausa para evitar problemas de carga
+    return {
+        "id": product["id"],
+        "nombre": product["display_name"],
+        "categoria_L1": category_L1,
+        "categoria_L2": category_L2,
+        "categoria_L3": category_L3,
+        "precio_con_descuento": float(price_instructions["unit_price"]),
+        "precio_sin_descuento": float(previous_price.strip()) 
+            if isinstance(previous_price, str) else None,
+        "packaging": product.get("packaging"),
+        "bulk_price": float(price_instructions["bulk_price"]) 
+            if price_instructions.get("bulk_price") else None,
+        "unit_size": price_instructions.get("unit_size"),
+        "size_format": price_instructions.get("size_format"),
+        "iva": price_instructions.get("iva"),
+        "selling_method": price_instructions.get("selling_method"),
+        "is_pack": price_instructions.get("is_pack"),
+        "is_new": price_instructions.get("is_new"),
+        "price_decreased": price_instructions.get("price_decreased"),
+        "unavailable_from": product.get("unavailable_from"),
+        "url": product["share_url"],
+        "imagen": product["thumbnail"]
+    }
 
-    print("Clicking continue...")
-    # Clic en el botón "Continuar"
-    WebDriverWait(driver, 5).until(
-        EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.button-primary'))
-    ).click()
+def get_all_products():
+    """Obtiene todos los productos de Mercadona."""
+    productos = []
+    categories_L1 = fetch_categories()
     
-    time.sleep(1)
-
-    print("Accepting cookies...")
-    # Aceptar cookies
-    WebDriverWait(driver, 5).until(
-    EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.ui-button.ui-button--small.ui-button--tertiary.ui-button--positive'))
-    ).click()
-
-
-    print("Código postal ingresado y cookies aceptadas.")
-
-def get_images(driver):
-    #Read image
-    img_element = driver.find_element(By.TAG_NAME, 'img')
-    img_url = img_element.get_attribute('src')
-    if not os.path.exists('imgs'):
-        os.makedirs('imgs')
-    img_data = requests.get(img_url).content
-    img_filename = str(uuid.uuid4()) + '.jpg'
-    img_path = os.path.join('imgs', img_filename)
-    img_data = requests.get(img_url).content
-    with open(img_path, 'wb') as file:
-        file.write(img_data)
-
-    return img_path
-
-
-def load_config():
-    """Carga la configuración desde el archivo TOML."""
-    print("Cargando config.toml...")
-    config = toml.load("config.toml")
-    return config["settings"]["codigo_postal"], config["settings"]["driver_path"]
-
-def init_webdriver(driver_path):
-    """Inicia y configura el WebDriver."""
-    print(f"Usando ChromeDriver en: {driver_path}")
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument("--headless=new")
-    service = Service(driver_path)
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    return driver
-
-def get_categories(driver):
-    """Obtiene las categorías principales."""
-    return driver.find_elements(By.CSS_SELECTOR, 'label.subhead1-r')
-
-def navigate_to_subcategory(driver, i):
-    """Navega a una subcategoría específica haciendo clic en la categoría correspondiente."""
-    label = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.XPATH, f'//*[@id="root"]/div[2]/div[1]/ul/li[{i}]/div/button/span/label'))
-    )
-    label.click()
-
-def get_subcategories(driver):
-    """Obtiene las subcategorías dentro de una categoría."""
-    return driver.find_elements(By.CSS_SELECTOR, 'button.category-item__link')
-
-def get_products(driver):
-    """Obtiene los productos dentro de una subcategoría."""
-    return WebDriverWait(driver, 10).until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'h4.subhead1-r.product-cell__description-name'))
-    )
-
-def process_product(driver, product, category_text, subcategory_text):
-    """Extrae la información de un producto y la agrega a la lista."""
-    print(f"Processing product: {product.text}")
-    product.click()
-
-    # Extraer información del producto
-    extractor = ProductExtractor(driver)
-    attributes = extractor.extract_product_data()
-    attributes["categoryL1"] = category_text
-    attributes["categoryL2"] = subcategory_text
-    attributes["ProductURL"] = driver.current_url
-
-    # Cerrar producto
-    close_button = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[data-testid="modal-close-button"]'))
-    )
-    close_button.click()
-
-    return attributes
-
-def save_data(list):
-    import json
-    json_file_path = 'products.json'
-
-    # Guardar la lista de productos en el archivo JSON
-    with open(json_file_path, 'w', encoding='utf-8') as json_file:
-        json.dump(list, json_file, ensure_ascii=False, indent=4)
-
-
-def get_mercadona_info():
-    """Función principal que gestiona todo el flujo de extracción de datos."""
-    # Cargar configuración y configurar el WebDriver
-    codigo_postal, driver_path = load_config()
-    driver = init_webdriver(driver_path)
+    for category_L1 in categories_L1:
+        nombre_L1 = category_L1["name"]
+        
+        for category_L2 in category_L1.get("categories", []):
+            nombre_L2 = category_L2["name"]
+            subcategory_id = category_L2["id"]
+            
+            categories_L3 = fetch_products(subcategory_id)
+            for category_L3 in categories_L3:
+                nombre_L3 = category_L3["name"]
+                
+                for product in category_L3.get("products", []):
+                    productos.append(parse_product(product, nombre_L1, nombre_L2, nombre_L3))
     
+    return productos
 
-     # Iniciar la página de Mercadona
-    print("Iniciando WebDriver en Mercadona...")
-    get_into_mercadona_web(driver, codigo_postal)
+def save_to_json(data, filename):
+    """Guarda los datos en un archivo JSON."""
+    with open(filename, "w", encoding="utf-8") as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
+
+def save_to_csv(data, filename):
+    """Guarda los datos en un archivo CSV."""
+    df = pd.DataFrame(data)
+    df.to_csv(filename, index=False)
+
+def main():
+    """Función principal para ejecutar el script."""
+    productos = get_all_products()
     
-    # Lista para almacenar los productos
-    product_list = []
+    # Guardar los datos
+    save_to_json(productos, "productos.json")
+    save_to_csv(productos, "productos.csv")
+    
+    print(f"Total de productos extraídos: {len(productos)}")
+    #print(pd.DataFrame(productos).head())
 
-    # Recorrer las categorías
-    print("Checking number of categories...")
-    categories = get_categories(driver)
-
-    for i, category in enumerate(categories):
-        category_text = category.text
-        print(f"Category in progress: {category_text}")
-
-        # Navegar a la categoría
-        navigate_to_subcategory(driver, i+1)
-
-        # Obtener las subcategorías
-        subcategories = get_subcategories(driver)
-
-        for j, subcategory in enumerate(subcategories):
-            subcategory_text = subcategory.text
-            print(f"SubCategory in progress: {subcategory_text}")
-
-            # Hacer clic en la subcategoría
-            WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.XPATH, f'/html/body/div[1]/div[2]/div[1]/ul/li[{i+1}]/div/ul/li[{j+1}]'))
-            ).click()
-
-            # Obtener los productos
-            products = get_products(driver)
-
-            for product in products:
-                # Procesar el producto
-                try:
-                    product_data = process_product(driver, product, category_text, subcategory_text)
-                    product_list.append(product_data)
-                except Exception as e:
-                    print(f"Error extracting data for product '{product.text}': {e}")
-                    continue  # Skip this product and continue with the next
-
-    # Guardar los datos extraídos
-    save_data(product_list)
+if __name__ == "__main__":
+    main()
