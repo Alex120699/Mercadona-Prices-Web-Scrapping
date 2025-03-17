@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from scripts.db_utils import get_db_connection
+from ..scripts.db_utils import get_db_connection
 
 def show():
     st.title("🔍 Detalles del Producto")
