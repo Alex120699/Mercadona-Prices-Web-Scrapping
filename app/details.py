@@ -13,8 +13,11 @@ def show():
     cursor.execute("SELECT * FROM productos")
     productos = cursor.fetchall()
 
+    # Obtener los nombres de las columnas
+    columns = [description[0] for description in cursor.description]
+
     # Convertir a DataFrame
-    df = pd.DataFrame(productos)
+    df = pd.DataFrame(productos, columns=columns)
     print(df.head())
     # Selección de producto
     selected_product = st.selectbox("Selecciona un producto:", df['nombre'].unique())
