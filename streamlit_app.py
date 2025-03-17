@@ -3,6 +3,7 @@ import app.home as home
 import app.products as products
 import app.details as details
 import app.kpis as kpis
+import app.iva as iva
 
 # Sidebar para la navegación
 st.sidebar.title("Navegación")
@@ -17,3 +18,5 @@ elif option == "Detalles de producto":
     details.show()
 elif option == "KPIs":
     kpis.show()
+elif option == "IVA":
+    iva.show()
