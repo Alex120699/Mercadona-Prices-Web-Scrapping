@@ -6,7 +6,10 @@ products copy.json
 variations.ipynb
 logo.ico
 old_csvs/
+# Excluir todo excepto el archivo productos.db
 data/*
+!data/productos.db
+
 productos.json
 productos.csv
 .devcontainer/
