@@ -7,7 +7,7 @@ import app.iva as iva
 
 # Sidebar para la navegación
 st.sidebar.title("Navegación")
-option = st.sidebar.radio("Selecciona una opción:", ["Home", "Ver productos", "Detalles de producto", "KPIs"])
+option = st.sidebar.radio("Selecciona una opción:", ["Home", "Ver productos", "Detalles de producto", "KPIs", "IVA Dashboards"])
 
 # Cargar el script según la opción seleccionada
 if option == "Home":
@@ -18,5 +18,5 @@ elif option == "Detalles de producto":
     details.show()
 elif option == "KPIs":
     kpis.show()
-elif option == "IVA":
+elif option == "IVA Dashboards":
     iva.show()
