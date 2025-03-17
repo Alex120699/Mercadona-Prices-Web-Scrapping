@@ -27,8 +27,13 @@ def iva_dashboard():
 
     # Gráfico 1: Distribución del IVA por Categoría (Pie Chart)
     st.header("1. Distribución del IVA por Categoría")
-    iva_category_counts = df.groupby('categoria_L1')['iva'].value_counts().unstack().fillna(0)
-    iva_category_counts.plot(kind='pie', figsize=(10, 6), autopct='%1.1f%%', legend=True)
+    iva_category_counts = df.groupby('categoria_L1')['iva'].value_counts().unstack(fill_value=0)
+    
+    # Calcular la suma total por IVA para cada categoría
+    iva_category_totals = iva_category_counts.sum(axis=1)
+    
+    # Graficar el pie chart con la distribución de IVA por categoría
+    iva_category_totals.plot(kind='pie', figsize=(10, 6), autopct='%1.1f%%', legend=True)
     st.pyplot()
 
     # Gráfico 2: Promedio de Precio por Producto según IVA (Bar Chart)
