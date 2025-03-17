@@ -64,5 +64,3 @@ def show():
     ax.set_title("Número de Productos por Tipo de IVA")
     ax.set_ylabel("Número de Productos")
     st.pyplot(fig)
-    
-    conn.close()
