@@ -32,34 +32,38 @@ def iva_dashboard():
     # Calcular la suma total por IVA para cada categoría
     iva_category_totals = iva_category_counts.sum(axis=1)
     
-    # Graficar el pie chart con la distribución de IVA por categoría
-    iva_category_totals.plot(kind='pie', figsize=(10, 6), autopct='%1.1f%%', legend=True)
-    st.pyplot()
+    # Crear la figura para el gráfico
+    fig, ax = plt.subplots(figsize=(10, 6))
+    iva_category_totals.plot(kind='pie', autopct='%1.1f%%', legend=True, ax=ax)
+    st.pyplot(fig)
 
     # Gráfico 2: Promedio de Precio por Producto según IVA (Bar Chart)
     st.header("2. Promedio de Precio por Producto según IVA")
     iva_avg_price = df.groupby('iva')['precio_con_descuento'].mean()
-    iva_avg_price.plot(kind='bar', figsize=(10, 6), color='skyblue')
-    plt.title("Promedio de Precio por IVA")
-    plt.ylabel("Precio Promedio (€)")
-    st.pyplot()
+    fig, ax = plt.subplots(figsize=(10, 6))
+    iva_avg_price.plot(kind='bar', color='skyblue', ax=ax)
+    ax.set_title("Promedio de Precio por IVA")
+    ax.set_ylabel("Precio Promedio (€)")
+    st.pyplot(fig)
 
     # Gráfico 3: Comparación de Productos con y sin IVA (Stacked Bar Chart)
     st.header("3. Comparación de Productos con y sin IVA")
     df['precio_con_iva'] = df['precio_con_descuento'] * (1 + df['iva'] / 100)
     iva_comparison = df.groupby('nombre')[['precio_con_descuento', 'precio_con_iva']].mean()
-    iva_comparison.plot(kind='bar', stacked=True, figsize=(12, 6), color=['lightgreen', 'lightcoral'])
-    plt.title("Comparación de Precios con y sin IVA")
-    plt.ylabel("Precio (€)")
-    st.pyplot()
+    fig, ax = plt.subplots(figsize=(12, 6))
+    iva_comparison.plot(kind='bar', stacked=True, color=['lightgreen', 'lightcoral'], ax=ax)
+    ax.set_title("Comparación de Precios con y sin IVA")
+    ax.set_ylabel("Precio (€)")
+    st.pyplot(fig)
 
     # Gráfico 4: Número de Productos por Tipo de IVA (Bar Chart)
     st.header("4. Número de Productos por Tipo de IVA")
     iva_counts = df['iva'].value_counts()
-    iva_counts.plot(kind='bar', figsize=(10, 6), color='lightblue')
-    plt.title("Número de Productos por Tipo de IVA")
-    plt.ylabel("Número de Productos")
-    st.pyplot()
+    fig, ax = plt.subplots(figsize=(10, 6))
+    iva_counts.plot(kind='bar', color='lightblue', ax=ax)
+    ax.set_title("Número de Productos por Tipo de IVA")
+    ax.set_ylabel("Número de Productos")
+    st.pyplot(fig)
 
 # Llamar a la función para mostrar los gráficos
 iva_dashboard()
