@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 # Asegúrate de importar la conexión a la base de datos y obtener el DataFrame con los datos
 from scripts.db_utils import get_db_connection
 
-def iva_dashboard():
+def show():
     """Muestra los gráficos relacionados con el IVA aplicado a los productos."""
 
     # Conectar a la base de datos
@@ -64,6 +64,5 @@ def iva_dashboard():
     ax.set_title("Número de Productos por Tipo de IVA")
     ax.set_ylabel("Número de Productos")
     st.pyplot(fig)
-
-# Llamar a la función para mostrar los gráficos
-iva_dashboard()
+    
+    conn.close()
