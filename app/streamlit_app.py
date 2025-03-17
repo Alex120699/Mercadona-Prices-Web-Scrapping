@@ -1,8 +1,8 @@
 import streamlit as st
-import scripts.home as home
-import scripts.products as products
-import scripts.details as details
-import scripts.kpis as kpis
+import app.home as home
+import app.products as products
+import app.details as details
+import app.kpis as kpis
 
 # Sidebar para la navegación
 st.sidebar.title("Navegación")

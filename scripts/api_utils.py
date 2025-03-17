@@ -85,8 +85,8 @@ def main():
     productos = get_all_products()
     
     # Guardar los datos
-    save_to_json(productos, "productos.json")
-    save_to_csv(productos, "productos.csv")
+    save_to_json(productos, "data/productos.json")
+    save_to_csv(productos, "data/productos.csv")
     
     print(f"Total de productos extraídos: {len(productos)}")
     #print(pd.DataFrame(productos).head())

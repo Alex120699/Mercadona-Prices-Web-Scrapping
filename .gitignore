@@ -2,10 +2,10 @@ venv/
 chromedriver-win64/
 __pycache__/
 config.toml
-imgs/
 products copy.json
 variations.ipynb
 logo.ico
-data/
+old_csvs/
+data/*
 productos.json
 productos.csv

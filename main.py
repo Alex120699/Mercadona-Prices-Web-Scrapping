@@ -1,4 +1,4 @@
-from scripts.historical.functions_v1 import main
+from scripts.api_utils import main
 
 if __name__ == "__main__":
     main()
