@@ -9,3 +9,4 @@ old_csvs/
 data/*
 productos.json
 productos.csv
+.devcontainer/
