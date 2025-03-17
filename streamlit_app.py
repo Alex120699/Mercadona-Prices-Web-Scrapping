@@ -9,6 +9,7 @@ import app.iva as iva
 st.sidebar.title("Navegación")
 option = st.sidebar.radio("Selecciona una opción:", ["Home", "Ver productos", "Detalles de producto", "KPIs", "IVA Dashboards"])
 
+
 # Cargar el script según la opción seleccionada
 if option == "Home":
     home.show()

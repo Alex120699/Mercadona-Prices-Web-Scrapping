@@ -1,7 +1,7 @@
 # app/home.py
 import streamlit as st
 import subprocess
-import datetime
+import sys
 
 def get_last_refresh_date():
     """Lee la fecha de la última actualización desde el archivo."""
@@ -23,7 +23,9 @@ def show():
         with st.spinner("Actualizando datos..."):
             # Ejecutar main.py para actualizar los datos
             try:
-                subprocess.run(["python", "main.py"], check=True)
+                import sys
+                subprocess.run([sys.executable, "main.py"], check=True)
+
                 st.success("¡Datos actualizados correctamente!")
                 # Actualizar la fecha de la última actualización
                 last_refresh = get_last_refresh_date()
