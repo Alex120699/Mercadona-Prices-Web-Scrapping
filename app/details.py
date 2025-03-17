@@ -15,7 +15,7 @@ def show():
 
     # Convertir a DataFrame
     df = pd.DataFrame(productos)
-
+    print(df.head())
     # Selección de producto
     selected_product = st.selectbox("Selecciona un producto:", df['nombre'].unique())
 
