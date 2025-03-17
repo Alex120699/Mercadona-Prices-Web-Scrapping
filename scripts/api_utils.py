@@ -1,6 +1,8 @@
 import requests
 import pandas as pd
 import json
+from scripts.db_utils import get_db_connection, update_product_prices
+
 
 # Constantes
 CATEGORIES_URL = "https://tienda.mercadona.es/api/categories/"
@@ -69,6 +71,44 @@ def get_all_products():
                     productos.append(parse_product(product, nombre_L1, nombre_L2, nombre_L3))
     
     return productos
+
+def guardar_datos_en_db(productos):
+    """Guarda los datos obtenidos de la API en la base de datos."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    for producto in productos:
+        # Insertar o actualizar el producto en la base de datos
+        cursor.execute("""
+        INSERT OR REPLACE INTO productos (
+            id, nombre, categoria_L1, categoria_L2, categoria_L3,
+            precio_con_descuento, precio_sin_descuento, packaging,
+            bulk_price, unit_size, size_format, iva, selling_method,
+            is_pack, is_new, price_decreased, unavailable_from, url, imagen
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            producto["id"], producto["nombre"], producto["categoria_L1"],
+            producto["categoria_L2"], producto["categoria_L3"],
+            producto["precio_con_descuento"], producto["precio_sin_descuento"],
+            producto["packaging"], producto["bulk_price"], producto["unit_size"],
+            producto["size_format"], producto["iva"], producto["selling_method"],
+            producto["is_pack"], producto["is_new"], producto["price_decreased"],
+            producto["unavailable_from"], producto["url"], producto["imagen"]
+        ))
+
+    # Guardar los cambios y cerrar la conexión
+    conn.commit()
+    conn.close()
+
+def actualizar_datos():
+    """Obtiene datos de la API y los guarda en la base de datos."""
+    productos = get_all_products()
+    if productos:
+        guardar_datos_en_db(productos)
+        update_product_prices(productos)  # Actualizar el histórico de precios
+        print("Datos actualizados correctamente.")
+    else:
+        print("No se pudieron obtener datos de la API.")
 
 def save_to_json(data, filename):
     """Guarda los datos en un archivo JSON."""
