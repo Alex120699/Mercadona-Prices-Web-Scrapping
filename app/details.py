@@ -1,25 +1,32 @@
 import streamlit as st
-import json
 import pandas as pd
-
-@st.cache_data
-def load_data():
-    with open("products.json", "r") as f:
-        return json.load(f)
+from scripts.db_utils import get_db_connection
 
 def show():
     st.title("🔍 Detalles del Producto")
 
-    # Cargar datos
-    df = pd.DataFrame(load_data())
+    # Conectar a la base de datos
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Obtener los productos
+    cursor.execute("SELECT * FROM productos")
+    productos = cursor.fetchall()
+
+    # Convertir a DataFrame
+    df = pd.DataFrame(productos)
 
     # Selección de producto
-    selected_product = st.selectbox("Selecciona un producto:", df['description'].unique())
+    selected_product = st.selectbox("Selecciona un producto:", df['nombre'].unique())
 
     # Mostrar detalles del producto seleccionado
-    product_info = df[df['description'] == selected_product].iloc[0]
+    product_info = df[df['nombre'] == selected_product].iloc[0]
     
-    st.write(f"**Descripción:** {product_info['description']}")
-    st.write(f"**Precio:** {product_info['price']}")
-    st.write(f"**Categoría:** {product_info['categoryL1']} > {product_info['categoryL2']}")
-    st.write(f"[Ver en tienda]({product_info['ProductURL']})")
+    st.write(f"**Nombre:** {product_info['nombre']}")
+    st.write(f"**Precio con descuento:** {product_info['precio_con_descuento']}")
+    st.write(f"**Precio sin descuento:** {product_info['precio_sin_descuento']}")
+    st.write(f"**Categoría:** {product_info['categoria_L1']} > {product_info['categoria_L2']} > {product_info['categoria_L3']}")
+    st.write(f"[Ver en tienda]({product_info['url']})")
+
+    # Cerrar la conexión
+    conn.close()

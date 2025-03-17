@@ -2,6 +2,13 @@
 import sqlite3
 import json
 
+
+def get_db_connection():
+    """Conecta a la base de datos SQLite."""
+    conn = sqlite3.connect("data/productos.db")
+    conn.row_factory = sqlite3.Row  # Para acceder a las columnas por nombre
+    return conn
+
 def create_database():
     """Crea la base de datos SQLite y la tabla de productos."""
     conn = sqlite3.connect("data/productos.db")
