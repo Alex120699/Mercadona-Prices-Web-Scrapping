@@ -1,5 +1,5 @@
 import streamlit as st
-import app.home as home
+import home as home
 import app.products as products
 import app.details as details
 import app.kpis as kpis
