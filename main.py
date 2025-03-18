@@ -14,7 +14,7 @@ def git_push():
 
         # Configurar autenticación con GITHUB_TOKEN
         github_token = os.getenv("GITHUB_TOKEN")
-        repo_url = f"https://x-access-token:{github_token}@github.com/tu_usuario/tu_repositorio.git"
+        repo_url = f"https://x-access-token:{github_token}@Alex120699/Mercadona-Prices-Web-Scrapping.git"
         subprocess.run(["git", "remote", "set-url", "origin", repo_url], check=True)
 
         # Añadir y subir cambios
