@@ -2,7 +2,7 @@ name: Actualizar Base de Datos
 
 on:
   schedule:
-    - cron: '*/1 * * * *'  # Ejecutar cada 5 minutos para pruebas
+    - cron: '0 8 * * *'  # Ejecutar cada 5 minutos para pruebas
   #workflow_dispatch:  # Permitir ejecución manuals
 
 jobs:
