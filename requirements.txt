@@ -23,7 +23,7 @@ kiwisolver==1.4.0
 MarkupSafe==3.0.2
 matplotlib==3.9.0
 narwhals==1.30.0
-numpy==2.2.3
+numpy==2.0.0
 outcome==1.3.0.post0
 packaging==24.2
 pandas==2.2.3
