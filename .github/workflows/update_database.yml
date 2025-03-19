@@ -13,7 +13,7 @@ jobs:
       - name: Checkout del repositorio
         uses: actions/checkout@v3
         with:
-          ref: dev  # Especifica la rama dev
+          ref: main  # Especifica la rama main
 
       - name: Configurar Python
         uses: actions/setup-python@v4
@@ -39,5 +39,5 @@ jobs:
           else
             git add .
             git commit -m "Actualización automática de la base de datos"
-            git push origin main  # Subir cambios a la rama dev
+            git push origin main  # Subir cambios a la rama main
           fi
