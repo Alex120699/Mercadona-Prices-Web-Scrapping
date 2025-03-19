@@ -39,5 +39,5 @@ jobs:
           else
             git add .
             git commit -m "Actualización automática de la base de datos"
-            git push origin dev  # Subir cambios a la rama dev
+            git push origin main  # Subir cambios a la rama dev
           fi
