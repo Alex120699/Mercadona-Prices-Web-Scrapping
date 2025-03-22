@@ -1,6 +1,7 @@
 # app/cambios_precios.py
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 from scripts.db_utils import get_db_connection
 
@@ -95,6 +96,41 @@ def show():
         # Mostrar top 10 bajadas
         st.header("Top 10 Bajadas de Precios")
         st.dataframe(df_top_bajadas[["nombre_y_tamaño", "cambio", "precio_inicial", "precio_final"]])
+
+    # Buscador de productos
+    st.sidebar.header("Buscar Producto")
+    producto_buscado = st.sidebar.selectbox(
+        "Selecciona un producto para ver su evolución:",
+        df_productos["nombre_y_tamaño"]
+    )
+
+    # Obtener el ID del producto seleccionado
+    producto_id = df_productos[df_productos["nombre_y_tamaño"] == producto_buscado]["id"].iloc[0]
+
+    # Obtener el histórico de precios del producto seleccionado
+    df_producto_historico = df_historico[df_historico["producto_id"] == producto_id]
+
+    # Mostrar el cambio de precio en el período seleccionado
+    if not df_producto_historico.empty:
+        precio_inicial = df_producto_historico.iloc[0]["Precio"]
+        precio_final = df_producto_historico.iloc[-1]["Precio"]
+        cambio = precio_final - precio_inicial
+
+        st.header(f"Evolución de Precios: {producto_buscado}")
+        st.write(f"**Precio inicial ({df_producto_historico.iloc[0]['Fecha de actualización'].strftime('%Y-%m-%d')}):** {precio_inicial} €")
+        st.write(f"**Precio final ({df_producto_historico.iloc[-1]['Fecha de actualización'].strftime('%Y-%m-%d')}):** {precio_final} €")
+        st.write(f"**Cambio:** {cambio:.2f} €")
+
+        # Gráfico de evolución de precios
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.plot(df_producto_historico["Fecha de actualización"], df_producto_historico["Precio"], marker='o', linestyle='-', color='b')
+        ax.set_title(f"Evolución de Precios: {producto_buscado}")
+        ax.set_xlabel("Fecha de actualización")
+        ax.set_ylabel("Precio (€)")
+        plt.xticks(rotation=45)
+        st.pyplot(fig)
+    else:
+        st.warning(f"No hay datos históricos para el producto: {producto_buscado}.")
 
     # Cerrar la conexión
     conn.close()
