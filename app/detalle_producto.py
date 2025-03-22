@@ -90,12 +90,12 @@ def show():
         df_top_bajadas = df_cambios.sort_values(by="cambio", ascending=True).head(10)
 
         # Mostrar top 10 subidas
-        st.header("Top 10 Subidas de Precios")
-        st.dataframe(df_top_subidas[["nombre_y_tamaño", "cambio", "precio_inicial", "precio_final"]])
+        #st.header("Top 10 Subidas de Precios")
+        #st.dataframe(df_top_subidas[["nombre_y_tamaño", "cambio", "precio_inicial", "precio_final"]])
 
         # Mostrar top 10 bajadas
-        st.header("Top 10 Bajadas de Precios")
-        st.dataframe(df_top_bajadas[["nombre_y_tamaño", "cambio", "precio_inicial", "precio_final"]])
+        #st.header("Top 10 Bajadas de Precios")
+        #st.dataframe(df_top_bajadas[["nombre_y_tamaño", "cambio", "precio_inicial", "precio_final"]])
 
     # Buscador de productos
     st.sidebar.header("Buscar Producto")
