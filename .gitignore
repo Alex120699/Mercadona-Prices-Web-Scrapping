@@ -13,3 +13,5 @@ data/*
 productos.json
 productos.csv
 .devcontainer/
+app/chat.py
+app/chat_v2.py
