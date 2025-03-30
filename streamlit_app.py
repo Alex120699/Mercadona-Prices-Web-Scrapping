@@ -5,7 +5,7 @@ import app.detalle_producto as details
 import app.kpis as kpis
 import app.iva as iva
 import app.historico as historico
-import app.chat_v2 as chat
+#import app.chat_v2 as chat
 
 # Sidebar para la navegación
 st.sidebar.title("Navegación")
